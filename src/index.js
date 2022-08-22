@@ -7,8 +7,11 @@
  *
  * Learn more at https://developers.cloudflare.com/workers/
  */
-const imageDomain = "image.shangao.tech"
-const b2Bucket = 'images';
+const imageDomain = "img.shangao.tech";
+const workerName = "wandering-sun-09fb"
+const userSubDomain = "lostsquirrel.workers.dev"
+const imageDevDommian = `${workerName}.${userSubDomain}`;
+const b2Bucket = "public-image";
 const b2UrlPath = `/file/${b2Bucket}`;
 
 const corsFileTypes = ['png', 'jpg', 'gif', 'jpeg', 'webp'];
@@ -41,14 +44,16 @@ const fixHeaders = function(url, status, headers) {
     });
     return newHdrs;
 };
-async function fileReq(request) {
+async function fileReq(request, env) {
     const cache = caches.default; // Cloudflare edge caching
     const url = new URL(request.url);
-    if (url.host === imageDomain || url.host === "localhost") {
+    const b2host = await env.B2.get("b2download");
+    if (url.host === imageDomain || url.host === imageDevDommian) {
         if (!url.pathname.startsWith(b2UrlPath)) {
             url.pathname = `${b2UrlPath}/${url.pathname}`;
         }
     }
+    url.host = b2host;
     let response = await cache.match(url);
     if (response) {
         let newHdrs = fixHeaders(url, response.status, response.headers);
@@ -59,10 +64,10 @@ async function fileReq(request) {
             headers: newHdrs
         });
     }
-    let authToken = await B2.get("b2token")
+    let authToken = await env.B2.get("b2token")
     let b2Headers = new Headers(request.headers)
     b2Headers.append("Authorization", authToken)
-    modRequest = new Request(url, {
+    const modRequest = new Request(url, {
         method: request.method,
         headers: b2Headers,
         cf: { polish: "lossless" }
@@ -80,7 +85,7 @@ async function fileReq(request) {
 }
 
 export default {
-    async fetch(request) {
-        return fileReq(request);
+    async fetch(request, env) {
+        return fileReq(request, env);
     },
 };
