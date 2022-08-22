@@ -1,0 +1,6 @@
+name = "wandering-sun-09fb"
+main = "src/index.js"
+compatibility_date = "2022-08-21"
+kv_namespaces = [
+    { binding = "B2", id = "108dcfc46b1c4267ad30a4d7055c6bde", preview_id = "bedab3634b9246968bb2a79f9e4df218" }
+]

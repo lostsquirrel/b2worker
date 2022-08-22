@@ -1,0 +1,12 @@
+{
+    "name": "wandering-sun-09fb",
+    "version": "0.0.0",
+    "devDependencies": {
+        "wrangler": "2.0.26"
+    },
+    "private": true,
+    "scripts": {
+        "start": "wrangler dev",
+        "deploy": "wrangler publish"
+    }
+}
